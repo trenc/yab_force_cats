@@ -20,8 +20,8 @@ p. yab_image_cats's  minimum requirements:
 
 h2(#help-config03). Configuration
 
-p. Install the plugin and activate it. In the plugin code got to the first function named @yab_ic_configi()@.<br />
-Here you can change the @preSelectedCategory@ to a category which you would be pre selected.
+p. Install the plugin and activate it. In the plugin code go to the first function named @yab_ic_config()@.<br />
+Here you can change the @preSelectedCategory@ to a category which you would be defined as pre selected for the image category dropdown.
 
 h2(#help-section10). Changelog
 
