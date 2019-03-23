@@ -10,17 +10,17 @@
 // file name. Plugin names should start with a three letter prefix which is
 // unique and reserved for each plugin author ("abc" is just an example).
 // Uncomment and edit this line to override:
-$plugin['name'] = 'yab_image_cats';
+$plugin['name'] = 'yab_force_cats';
 
 // Allow raw HTML help, as opposed to Textile.
 // 0 = Plugin help is in Textile format, no raw HTML allowed (default).
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.1.0';
+$plugin['version'] = '0.2.0';
 $plugin['author'] = 'Tommy Schmucker';
 $plugin['author_uri'] = 'http://www.yablo.de/';
-$plugin['description'] = 'Forces you to use image categories.';
+$plugin['description'] = 'Forces you to use image and file categories.';
 
 // Plugin load order:
 // The default value of 5 would fit most plugins, while for instance comment
@@ -72,15 +72,15 @@ if (!defined('txpinterface'))
 
 # --- BEGIN PLUGIN CODE ---
 /**
- * yab_image_cats
+ * yab_force_cats
  *
  * A Textpattern CMS plugin.
- * Forces you to use image categories.
+ * Forces you to use image and file categories.
  *
  * @author Tommy Schmucker
  * @link   http://www.yablo.de/
  * @link   http://tommyschmucker.de/
- * @date   2019-03-22
+ * @date   2019-03-23
  *
  * This plugin is released under the GNU General Public License Version 2 and above
  * Version 2: http://www.gnu.org/licenses/gpl-2.0.html
@@ -93,12 +93,13 @@ if (!defined('txpinterface'))
  * @param string $what
  * @return string configuration value
  */
-function yab_ic_config($what)
+function yab_fc_config($what)
 {
 
 	$config = array(
 
-		'preSelectedCategory' => '' // name of the pre selected image category
+		'preSelectedCategoryImage' => '', // name of the pre selected image category
+		'preSelectedCategoryFile' => '' // name of the pre selected image category
 
 	);
 
@@ -112,7 +113,7 @@ if (@txpinterface === 'admin')
 
 	register_callback(
 
-		'yab_image_cats',
+		'yab_force_cats',
 		'admin_side',
 		'body_end'
 
@@ -121,23 +122,35 @@ if (@txpinterface === 'admin')
 }
 
 /**
- * Prefill the image category for uploads
+ * Prefills the image or file category dropdown for uploads
  *
  * @return void Echos the JavaScript injection
  */
-function yab_image_cats()
+function yab_force_cats()
 {
 
 	global $event, $step;
 
-	$url = hu.'textpattern/index.php?event=image&search_method=category&crit=';
+	$eventsArray = array('image', 'file');
+	$stepsArray  = array('image_edit', 'file_edit');
 
-	if ($event !== 'image' or $step === 'image_edit')
+	// just allow in images and files list
+	if (!in_array($event, $eventsArray))
 	{
 
 		return;
 
 	}
+
+	// but there is no list_list step so workaround
+	if (in_array($step, $stepsArray))
+	{
+
+		return;
+		
+	}
+	
+	$url = hu.'textpattern/index.php?event='.$event.'&search_method=category&crit=';
 
 	extract(gpsa(array(
 
@@ -146,7 +159,7 @@ function yab_image_cats()
 
 	)));
 
-	$preCat = yab_ic_config('preSelectedCategory');
+	$preCat = yab_fc_config('preSelectedCategory'.ucfirst($event));
 
 	if ($search_method === 'category')
 	{
@@ -167,18 +180,24 @@ function yab_image_cats()
 
 	const preCat = '$preCat';
 
-	const catDropdown = document.getElementById('image_category');
-
+	const catDropdown = document.getElementById('image_category') || document.getElementById('file_category');
 
 	catDropdown.querySelector('option[value="' + preCat +'"]').selected = true;
-
 
 	const selectedUploadCat = catDropdown.options[catDropdown.selectedIndex].value;
 
 	const uploadButton = document.querySelectorAll('.inline-file-uploader-actions > input[type=submit]')[0];
 
-	setDisabledByValue(uploadButton, selectedUploadCat);
+	const crit = getUrlVar('crit');
 
+	if (crit === false && preCat !== '') {
+
+		// we can do better next by ajax loading the results
+		window.location = '$url' + preCat;
+
+	}
+
+	setDisabledByValue(uploadButton, selectedUploadCat);
 
 	catDropdown.onchange = function() {
 
@@ -186,13 +205,8 @@ function yab_image_cats()
 
 		setDisabledByValue(uploadButton, changedUploadCat);
 
-		// change uri
 		// we can do better next by ajax loading the results
-		if (changedUploadCat) {
-
-			window.location = '$url' + changedUploadCat;
-
-		}
+		window.location = '$url' + changedUploadCat;
 
 	}
 
@@ -211,6 +225,31 @@ function yab_image_cats()
 
 	}
 
+
+	function getUrlVar(getVar)
+	{
+
+		const query = window.location.search.substring(1);
+
+		const vars = query.split('&');
+
+		for (variable of vars) {
+
+			const pair = variable.split('=');
+
+			if (pair[0] == getVar) {
+
+				return pair[1];
+
+			}
+
+		}
+
+		return false;
+
+	}
+
+
 })();
 
 EOF;
@@ -228,11 +267,11 @@ if (0) {
 -->
 <!--
 # --- BEGIN PLUGIN HELP ---
-h1. yab_image_cats
+h1. yab_force_cats
 
-p. A TXP plugin that forces you to use image categories.
+p. A TXP plugin that forces you to use image and file categories.
 
-p. *Version:* 0.1.0
+p. *Version:* 0.2.0
 
 h2. Table of contents
 
@@ -244,17 +283,20 @@ h2. Table of contents
 
 h2(#help-section02). Plugin requirements
 
-p. yab_image_cats's  minimum requirements:
+p. yab_force_cats's  minimum requirements:
 
 * Textpattern 4.7.3
 
 h2(#help-config03). Configuration
 
-p. Install the plugin and activate it. In the plugin code go to the first function named @yab_ic_config()@.<br />
-Here you can change the @preSelectedCategory@ to a category which you would be defined as pre selected for the image category dropdown.
+p. Install the plugin and activate it. In the plugin code got to the first function named @yab_ic_configi()@.<br />
+Here you can change the @preSelectedCategoryImage@ and @preSelectedCategoryFile@to a category which you would be pre selected.
 
 h2(#help-section10). Changelog
 
+* v0.2.0: 2019-03-23
+** renamed form yab_image_cats to proper yab_force_cats
+** does now work also with file categories
 * v0.1.0: 2019-03-22
 ** initial release
 
@@ -268,7 +310,7 @@ h2(#help-section12). Author contact
 
 * "Author's site":https://www.yablo.de/
 * "Author's site":https://tommyschmucker.de/
-* "Plugin on GitHub":https://github.com/trenc/yab_image_cats
+* "Plugin on GitHub":https://github.com/trenc/yab_force_cats
 # --- END PLUGIN HELP ---
 -->
 <?php

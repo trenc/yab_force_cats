@@ -1,8 +1,8 @@
-h1. yab_image_cats
+h1. yab_force_cats
 
-p. A TXP plugin that forces you to use image categories.
+p. A TXP plugin that forces you to use image and file categories.
 
-p. *Version:* 0.1.0
+p. *Version:* 0.2.0
 
 h2. Table of contents
 
@@ -14,17 +14,20 @@ h2. Table of contents
 
 h2(#help-section02). Plugin requirements
 
-p. yab_image_cats's  minimum requirements:
+p. yab_force_cats's  minimum requirements:
 
 * Textpattern 4.7.3
 
 h2(#help-config03). Configuration
 
-p. Install the plugin and activate it. In the plugin code go to the first function named @yab_ic_config()@.<br />
-Here you can change the @preSelectedCategory@ to a category which you would be defined as pre selected for the image category dropdown.
+p. Install the plugin and activate it. In the plugin code got to the first function named @yab_ic_configi()@.<br />
+Here you can change the @preSelectedCategoryImage@ and @preSelectedCategoryFile@to a category which you would be pre selected.
 
 h2(#help-section10). Changelog
 
+* v0.2.0: 2019-03-23
+** renamed form yab_image_cats to proper yab_force_cats
+** does now work also with file categories
 * v0.1.0: 2019-03-22
 ** initial release
 
@@ -38,4 +41,4 @@ h2(#help-section12). Author contact
 
 * "Author's site":https://www.yablo.de/
 * "Author's site":https://tommyschmucker.de/
-* "Plugin on GitHub":https://github.com/trenc/yab_image_cats
+* "Plugin on GitHub":https://github.com/trenc/yab_force_cats
